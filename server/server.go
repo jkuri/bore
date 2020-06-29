@@ -39,14 +39,19 @@ func NewBoreServer(opts *Options, logger *zap.Logger) *BoreServer {
 
 // Run starts the bore server.
 func (s *BoreServer) Run() error {
-	if err := s.httpServer.Run(s.opts.HTTPAddr, s.handleHTTP()); err != nil {
-		return err
-	}
-	if err := s.sshServer.Run(s.opts); err != nil {
-		return err
-	}
-
 	errch := make(chan error)
+
+	go func() {
+		if err := s.httpServer.Run(s.opts.HTTPAddr, s.handleHTTP()); err != nil {
+			errch <- err
+		}
+	}()
+
+	go func() {
+		if err := s.sshServer.Run(s.opts); err != nil {
+			errch <- err
+		}
+	}()
 
 	go func() {
 		if err := s.httpServer.Wait(); err != nil {

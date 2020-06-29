@@ -42,9 +42,10 @@ func NewSSHServer(logger *zap.SugaredLogger) *SSHServer {
 		config: &ssh.ServerConfig{
 			NoClientAuth: true,
 		},
-		running: make(chan error, 1),
-		clients: make(map[string]*client),
-		logger:  logger,
+		running:   make(chan error, 1),
+		clients:   make(map[string]*client),
+		logger:    logger,
+		isRunning: true,
 	}
 }
 
@@ -63,7 +64,6 @@ func (s *SSHServer) Run(opts *Options) error {
 	s.domain = opts.Domain
 
 	go s.closeWith(s.listen())
-
 	return nil
 }
 
@@ -73,7 +73,7 @@ func (s *SSHServer) Close() error {
 	return s.listener.Close()
 }
 
-// Wait waits for SSH server to close.
+// Wait waits for server to be stopped
 func (s *SSHServer) Wait() error {
 	if !s.isRunning {
 		return fmt.Errorf("already closed")
@@ -92,7 +92,7 @@ func (s *SSHServer) closeWith(err error) {
 func (s *SSHServer) listen() error {
 	listener, err := net.Listen("tcp", s.addr)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	s.listener = listener
 
@@ -166,7 +166,6 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 		client.tcpConn.SetDeadline(time.Now().Add(2 * time.Minute))
 
 		if req.Type == "tcpip-forward" {
-			client.mu.Lock()
 			listener, bindInfo, err := s.handleForward(client, req)
 			if err != nil {
 				s.logger.Errorf("[%s] Error, disconnecting: %v", client.id, err)

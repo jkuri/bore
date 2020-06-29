@@ -21,9 +21,10 @@ type HTTPServer struct {
 // NewHTTPServer creates a new HTTPServer instance.
 func NewHTTPServer(logger *zap.SugaredLogger) *HTTPServer {
 	return &HTTPServer{
-		Server:  &http.Server{},
-		running: make(chan error),
-		logger:  logger,
+		Server:    &http.Server{},
+		running:   make(chan error),
+		logger:    logger,
+		isRunning: true,
 	}
 }
 
@@ -35,7 +36,6 @@ func (h *HTTPServer) Run(addr string, handler http.Handler) error {
 	}
 	h.Handler = handler
 	h.listener = listener
-	h.isRunning = true
 
 	h.logger.Infof("Starting HTTP server on %s", addr)
 
