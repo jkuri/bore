@@ -16,6 +16,7 @@ import (
 // SSHServer defines SSH server instance.
 type SSHServer struct {
 	mu        sync.Mutex
+	opts      *Options
 	listener  net.Listener
 	config    *ssh.ServerConfig
 	running   chan error
@@ -37,8 +38,9 @@ type client struct {
 }
 
 // NewSSHServer returns new instance of SSHServer.
-func NewSSHServer(logger *zap.SugaredLogger) *SSHServer {
+func NewSSHServer(opts *Options, logger *zap.SugaredLogger) *SSHServer {
 	return &SSHServer{
+		opts: opts,
 		config: &ssh.ServerConfig{
 			NoClientAuth: true,
 		},
@@ -50,8 +52,8 @@ func NewSSHServer(logger *zap.SugaredLogger) *SSHServer {
 }
 
 // Run starts the SSH server.
-func (s *SSHServer) Run(opts *Options) error {
-	privateKeyContent, err := ioutil.ReadFile(opts.PrivateKey)
+func (s *SSHServer) Run() error {
+	privateKeyContent, err := ioutil.ReadFile(s.opts.PrivateKey)
 	if err != nil {
 		return err
 	}
@@ -60,8 +62,8 @@ func (s *SSHServer) Run(opts *Options) error {
 		return err
 	}
 	s.config.AddHostKey(private)
-	s.addr = opts.SSHAddr
-	s.domain = opts.Domain
+	s.addr = s.opts.SSHAddr
+	s.domain = s.opts.Domain
 
 	go s.closeWith(s.listen())
 	return nil
@@ -156,7 +158,13 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 			return
 		}
 
-		url := fmt.Sprintf("http://%s.%s", client.id, s.domain)
+		_, port, _ := net.SplitHostPort(s.opts.HTTPAddr)
+		if port == "80" {
+			port = ""
+		} else {
+			port = fmt.Sprintf(":%s", port)
+		}
+		url := fmt.Sprintf("Generated URL: http://%s.%s%s\n", client.id, s.domain, port)
 		io.WriteString(chconn, url)
 	}
 }

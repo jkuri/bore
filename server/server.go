@@ -32,7 +32,7 @@ func NewBoreServer(opts *Options, logger *zap.Logger) *BoreServer {
 	log := logger.Sugar()
 	return &BoreServer{
 		opts:       opts,
-		sshServer:  NewSSHServer(log),
+		sshServer:  NewSSHServer(opts, log),
 		httpServer: NewHTTPServer(log),
 	}
 }
@@ -48,7 +48,7 @@ func (s *BoreServer) Run() error {
 	}()
 
 	go func() {
-		if err := s.sshServer.Run(s.opts); err != nil {
+		if err := s.sshServer.Run(); err != nil {
 			errch <- err
 		}
 	}()
