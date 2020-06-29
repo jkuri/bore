@@ -1,10 +1,9 @@
 package server
 
 import (
-	"errors"
+	"fmt"
 	"net"
 	"net/http"
-	"sync"
 
 	"go.uber.org/zap"
 )
@@ -16,7 +15,6 @@ type HTTPServer struct {
 	listener  net.Listener
 	isRunning bool
 	running   chan error
-	closer    sync.Once
 	logger    *zap.SugaredLogger
 }
 
@@ -54,7 +52,7 @@ func (h *HTTPServer) Close() error {
 // Wait waits for server to be stopped
 func (h *HTTPServer) Wait() error {
 	if !h.isRunning {
-		return errors.New("already closed")
+		return fmt.Errorf("already closed")
 	}
 	return <-h.running
 }

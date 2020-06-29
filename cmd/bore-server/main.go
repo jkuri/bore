@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	configFile  = flag.String("config", "bored.yaml", "relative path to config file")
+	configFile  = flag.String("config", "bore-server.yaml", "relative path to config file")
 	versionFlag = flag.Bool("version", false, "version")
 )
 

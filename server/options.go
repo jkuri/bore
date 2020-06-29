@@ -29,7 +29,7 @@ func NewConfig(configPath string) (*viper.Viper, error) {
 
 	dir := getConfigDir()
 	v.AddConfigPath(dir)
-	v.SetConfigName("bored")
+	v.SetConfigName("bore-server")
 	v.SetConfigType("yaml")
 
 	v.SetDefault("domain", "example.com")

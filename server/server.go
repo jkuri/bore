@@ -1,9 +1,14 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
 
 	"github.com/google/wire"
+	"github.com/yhat/wsutil"
 	"go.uber.org/zap"
 )
 
@@ -18,6 +23,7 @@ var ProviderSet = wire.NewSet(
 // includes HTTP and SSH server instances.
 type BoreServer struct {
 	opts       *Options
+	sshServer  *SSHServer
 	httpServer *HTTPServer
 }
 
@@ -26,6 +32,7 @@ func NewBoreServer(opts *Options, logger *zap.Logger) *BoreServer {
 	log := logger.Sugar()
 	return &BoreServer{
 		opts:       opts,
+		sshServer:  NewSSHServer(log),
 		httpServer: NewHTTPServer(log),
 	}
 }
@@ -35,18 +42,50 @@ func (s *BoreServer) Run() error {
 	if err := s.httpServer.Run(s.opts.HTTPAddr, s.handleHTTP()); err != nil {
 		return err
 	}
+	if err := s.sshServer.Run(s.opts); err != nil {
+		return err
+	}
 
-	return s.httpServer.Wait()
+	errch := make(chan error)
+
+	go func() {
+		if err := s.httpServer.Wait(); err != nil {
+			errch <- err
+		}
+	}()
+
+	go func() {
+		if err := s.sshServer.Wait(); err != nil {
+			errch <- err
+		}
+	}()
+
+	return <-errch
 }
 
 func (s *BoreServer) handleHTTP() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// host := r.Host
-		// pos := strings.IndexByte(host, '.')
-		// if pos > 0 {
-		// 	userID := host[:pos]
+		host := r.Host
+		pos := strings.IndexByte(host, '.')
+		if pos > 0 {
+			userID := host[:pos]
 
-		// }
+			if client, ok := s.sshServer.clients[userID]; ok {
+				w.Header().Set("X-Proxy", "bore")
+
+				if strings.ToLower(r.Header.Get("Upgrade")) == "websocket" {
+					url := &url.URL{Scheme: "ws", Host: fmt.Sprintf("%s:%d", client.addr, client.port)}
+					proxy := wsutil.NewSingleHostReverseProxy(url)
+					proxy.ServeHTTP(w, r)
+					return
+				}
+
+				url := &url.URL{Scheme: "http", Host: fmt.Sprintf("%s:%d", client.addr, client.port)}
+				proxy := httputil.NewSingleHostReverseProxy(url)
+				proxy.ServeHTTP(w, r)
+				return
+			}
+		}
 
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("Not found"))
