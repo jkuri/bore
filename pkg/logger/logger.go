@@ -3,11 +3,15 @@ package logger
 import (
 	"os"
 
+	"github.com/google/wire"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"gopkg.in/natefinch/lumberjack.v2"
 )
+
+// ProviderSet exports for wire DI.
+var ProviderSet = wire.NewSet(NewOptions, NewLogger)
 
 // Options for logger.
 type Options struct {

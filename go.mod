@@ -3,6 +3,7 @@ module github.com/jkuri/bore
 go 1.14
 
 require (
+	github.com/google/wire v0.4.0
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/spf13/viper v1.7.0
 	go.uber.org/zap v1.15.0

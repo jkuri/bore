@@ -29,8 +29,8 @@ func NewHTTPServer(logger *zap.SugaredLogger) *HTTPServer {
 	}
 }
 
-// Start starts HTTPServer instance and listens on specified addr.
-func (h *HTTPServer) Start(addr string, handler http.Handler) error {
+// Run starts HTTPServer instance and listens on specified addr.
+func (h *HTTPServer) Run(addr string, handler http.Handler) error {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err

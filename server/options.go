@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jkuri/bore/logger"
 	"github.com/jkuri/bore/pkg/fs"
+	"github.com/jkuri/bore/pkg/logger"
 	"github.com/jkuri/bore/pkg/rsa"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -29,7 +29,7 @@ func NewConfig(configPath string) (*viper.Viper, error) {
 
 	dir := getConfigDir()
 	v.AddConfigPath(dir)
-	v.SetConfigName("server")
+	v.SetConfigName("bored")
 	v.SetConfigType("yaml")
 
 	v.SetDefault("domain", "example.com")
