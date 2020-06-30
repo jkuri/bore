@@ -71,7 +71,7 @@ func (s *BoreServer) Run() error {
 func (s *BoreServer) handleHTTP() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		splitted := strings.Split(r.Host, ".")
-		if len(splitted) == 3 {
+		if len(splitted) >= 3 {
 			userID := splitted[0]
 
 			if client, ok := s.sshServer.clients[userID]; ok {
