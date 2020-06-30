@@ -6,7 +6,7 @@ COPY . /app
 
 WORKDIR /app
 
-RUN make install_dependencies && make
+RUN make install_dependencies && make statik_landing && make wire && make build_server
 
 FROM scratch
 

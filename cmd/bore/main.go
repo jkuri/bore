@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/jkuri/bore/client"
+	"github.com/jkuri/bore/internal/version"
 )
 
 var help = `
@@ -24,6 +25,8 @@ Options:
 
 -a, Keep tunnel connection alive (default: true)
 
+-version, prints bore version and build info
+
 Read more:
 	https://github.com/jkuri/bore
 `
@@ -34,6 +37,7 @@ var (
 	localServer  = flag.String("ls", "localhost", "")
 	localPort    = flag.Int("lp", 80, "")
 	keepAlive    = flag.Bool("a", true, "")
+	versionFlag  = flag.Bool("version", false, "version")
 )
 
 func main() {
@@ -42,6 +46,11 @@ func main() {
 		os.Exit(1)
 	}
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("%s\n", version.GenerateBuildVersionString())
+		os.Exit(0)
+	}
 
 	client := client.NewBoreClient(client.Config{
 		RemoteServer: *remoteServer,

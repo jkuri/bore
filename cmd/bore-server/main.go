@@ -2,7 +2,10 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
+
+	"github.com/jkuri/bore/internal/version"
 )
 
 var (
@@ -12,6 +15,11 @@ var (
 
 func main() {
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("%s\n", version.GenerateBuildVersionString())
+		os.Exit(0)
+	}
 
 	app, err := CreateApp(*configFile)
 	if err != nil {

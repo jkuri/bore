@@ -1,10 +1,15 @@
+UI_VERSION=$(shell cat web/bore-landing/package.json | grep version | head -1 | awk -F: '{ print $$2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]')
+VERSION_PATH=github.com/jkuri/bore/internal/version
+GIT_COMMIT=$(shell git rev-list -1 HEAD)
+BUILD_DATE=$(shell date +%FT%T%z)
+
 build: statik_landing wire build_server build_client
 
 build_server:
-	@CGO_ENABLED=0 go build -o ./build/bore-server ./cmd/bore-server
+	@CGO_ENABLED=0 go build -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore-server ./cmd/bore-server
 
 build_client:
-	@CGO_ENABLED=0 go build -o ./build/bore ./cmd/bore
+	@CGO_ENABLED=0 go build -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore ./cmd/bore
 
 build_ui_landing:
 	@if [ ! -d "web/bore-landing/dist" ]; then cd web/bore-landing && yarn build; fi
