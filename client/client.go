@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	minPort = 11000
+	minPort = 55000
 	maxPort = 65000
 )
 
