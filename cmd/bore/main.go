@@ -29,7 +29,7 @@ Read more:
 `
 
 var (
-	remoteServer = flag.String("s", "bore.jan.local", "")
+	remoteServer = flag.String("s", "bore.network", "")
 	remotePort   = flag.Int("p", 2200, "")
 	localServer  = flag.String("ls", "localhost", "")
 	localPort    = flag.Int("lp", 80, "")
