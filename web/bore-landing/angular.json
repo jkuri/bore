@@ -52,11 +52,17 @@
             "aot": true,
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@fortawesome/fontawesome-free/webfonts",
+                "output": "./assets/fonts/fa"
+              }
             ],
-            "styles": [
-              "src/styles.sass"
-            ],
+            "styles": ["src/styles/app.sass"],
+            "stylePreprocessorOptions": {
+              "includePaths": ["src/styles"]
+            },
             "scripts": []
           },
           "configurations": {
@@ -108,6 +114,7 @@
           }
         }
       }
-    }},
+    }
+  },
   "defaultProject": "bore-landing"
 }
