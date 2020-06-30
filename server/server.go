@@ -2,12 +2,15 @@ package server
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"strings"
 
 	"github.com/google/wire"
+	_ "github.com/jkuri/bore/internal/ui/landing" // landing UI
+	"github.com/jkuri/statik/fs"
 	"github.com/yhat/wsutil"
 	"go.uber.org/zap"
 )
@@ -25,15 +28,19 @@ type BoreServer struct {
 	opts       *Options
 	sshServer  *SSHServer
 	httpServer *HTTPServer
+	UILanding  http.Handler
 }
 
 // NewBoreServer returns new instance of BoreServer.
 func NewBoreServer(opts *Options, logger *zap.Logger) *BoreServer {
 	log := logger.Sugar()
+	landingFS, _ := fs.New()
+
 	return &BoreServer{
 		opts:       opts,
 		sshServer:  NewSSHServer(opts, log),
 		httpServer: NewHTTPServer(log),
+		UILanding:  http.FileServer(&statikWrapper{landingFS}),
 	}
 }
 
@@ -70,8 +77,13 @@ func (s *BoreServer) Run() error {
 
 func (s *BoreServer) handleHTTP() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		splitted := strings.Split(r.Host, ".")
-		if len(splitted) >= 3 {
+		host, _, err := net.SplitHostPort(r.Host)
+		if err != nil {
+			host = r.Host
+		}
+
+		if host != s.opts.Domain {
+			splitted := strings.Split(host, ".")
 			userID := splitted[0]
 
 			if client, ok := s.sshServer.clients[userID]; ok {
@@ -89,9 +101,12 @@ func (s *BoreServer) handleHTTP() http.Handler {
 				proxy.ServeHTTP(w, r)
 				return
 			}
+
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(fmt.Sprintf("client with ID %s not found", userID)))
+			return
 		}
 
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("Not found"))
+		s.UILanding.ServeHTTP(w, r)
 	})
 }

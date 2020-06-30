@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/google/wire v0.4.0
+	github.com/jkuri/statik v0.3.0
 	github.com/mitchellh/go-homedir v1.0.0
 	github.com/spf13/viper v1.7.0
 	github.com/yhat/wsutil v0.0.0-20170731153501-1d66fa95c997
