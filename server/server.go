@@ -28,7 +28,7 @@ type BoreServer struct {
 	opts       *Options
 	sshServer  *SSHServer
 	httpServer *HTTPServer
-	UILanding  http.Handler
+	UI         http.Handler
 }
 
 // NewBoreServer returns new instance of BoreServer.
@@ -40,7 +40,7 @@ func NewBoreServer(opts *Options, logger *zap.Logger) *BoreServer {
 		opts:       opts,
 		sshServer:  NewSSHServer(opts, log),
 		httpServer: NewHTTPServer(log),
-		UILanding:  http.FileServer(&statikWrapper{landingFS}),
+		UI:         http.FileServer(&statikWrapper{landingFS}),
 	}
 }
 
@@ -102,11 +102,11 @@ func (s *BoreServer) handleHTTP() http.Handler {
 				return
 			}
 
-			w.WriteHeader(http.StatusNotFound)
-			w.Write([]byte(fmt.Sprintf("client with ID %s not found", userID)))
+			url := &url.URL{Scheme: r.URL.Scheme, Host: s.opts.Domain, Path: "not-found", RawQuery: fmt.Sprintf("tunnelID=%s", userID)}
+			http.Redirect(w, r, url.String(), 301)
 			return
 		}
 
-		s.UILanding.ServeHTTP(w, r)
+		s.UI.ServeHTTP(w, r)
 	})
 }
