@@ -32,9 +32,14 @@ type client struct {
 	id        string
 	tcpConn   net.Conn
 	sshConn   *ssh.ServerConn
+	ch        ssh.Channel
 	listeners map[string]net.Listener
 	addr      string
 	port      uint32
+}
+
+func (c *client) write(data string) {
+	io.WriteString(c.ch, data)
 }
 
 // NewSSHServer returns new instance of SSHServer.
@@ -157,6 +162,7 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 			s.logger.Errorf("[%s] Could not accept channel: %v", client.id, err)
 			return
 		}
+		client.ch = chconn
 
 		_, port, _ := net.SplitHostPort(s.opts.HTTPAddr)
 		if port == "80" {
@@ -164,8 +170,8 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 		} else {
 			port = fmt.Sprintf(":%s", port)
 		}
-		url := fmt.Sprintf("Generated URL: http://%s.%s%s\n", client.id, s.domain, port)
-		io.WriteString(chconn, url)
+		url := fmt.Sprintf("\nGenerated URL: http://%s.%s%s\n\n", client.id, s.domain, port)
+		io.WriteString(client.ch, url)
 	}
 }
 

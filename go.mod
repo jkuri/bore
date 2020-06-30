@@ -3,6 +3,8 @@ module github.com/jkuri/bore
 go 1.14
 
 require (
+	github.com/dustin/go-humanize v1.0.0
+	github.com/felixge/httpsnoop v1.0.1
 	github.com/google/wire v0.4.0
 	github.com/jkuri/statik v0.3.0
 	github.com/mitchellh/go-homedir v1.0.0

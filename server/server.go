@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/dustin/go-humanize"
+	"github.com/felixge/httpsnoop"
 	"github.com/google/wire"
 	_ "github.com/jkuri/bore/internal/ui/landing" // landing UI
 	"github.com/jkuri/statik/fs"
@@ -49,7 +51,7 @@ func (s *BoreServer) Run() error {
 	errch := make(chan error)
 
 	go func() {
-		if err := s.httpServer.Run(s.opts.HTTPAddr, s.handleHTTP()); err != nil {
+		if err := s.httpServer.Run(s.opts.HTTPAddr, s.getHandler(s.handleHTTP())); err != nil {
 			errch <- err
 		}
 	}()
@@ -73,6 +75,31 @@ func (s *BoreServer) Run() error {
 	}()
 
 	return <-errch
+}
+
+func (s *BoreServer) getHandler(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		m := httpsnoop.CaptureMetrics(handler, w, r)
+		remote := r.Header.Get("X-Forwarded-For")
+		if remote == "" {
+			remote = r.RemoteAddr
+		}
+		log := fmt.Sprintf(
+			"%s %s (code=%d dt=%s written=%s remote=%s)",
+			r.Method,
+			r.URL,
+			m.Code,
+			m.Duration,
+			humanize.Bytes(uint64(m.Written)),
+			remote,
+		)
+		s.httpServer.logger.Debug(log)
+
+		userID := strings.Split(r.Host, ".")[0]
+		if client, ok := s.sshServer.clients[userID]; ok {
+			client.write(fmt.Sprintf("%s\n", log))
+		}
+	})
 }
 
 func (s *BoreServer) handleHTTP() http.Handler {
