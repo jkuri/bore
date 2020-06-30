@@ -10,7 +10,7 @@ RUN make install_dependencies && make
 
 FROM scratch
 
-ENV BORE_DOMAIN=jankuri.com BORE_HTTPADDR=0.0.0.0:80
+ENV BORE_DOMAIN=bore.network BORE_HTTPADDR=0.0.0.0:80
 
 COPY --from=build /etc/ssl/certs /etc/ssl/certs
 COPY --from=build /app/build/bore-server /bore-server

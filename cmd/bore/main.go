@@ -14,7 +14,7 @@ Usage: bore [options]
 
 Options:
 
--s, SSH server remote host (default: bore.jan.local)
+-s, SSH server remote host (default: bore.network)
 
 -p, SSH server remote port (default: 2200)
 
