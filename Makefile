@@ -1,4 +1,4 @@
-UI_VERSION=$(shell cat web/bore-landing/package.json | grep version | head -1 | awk -F: '{ print $$2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]')
+UI_VERSION=$(shell cat web/bore/package.json | grep version | head -1 | awk -F: '{ print $$2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]')
 VERSION_PATH=github.com/jkuri/bore/internal/version
 GIT_COMMIT=$(shell git rev-list -1 HEAD)
 BUILD_DATE=$(shell date +%FT%T%z)
@@ -16,19 +16,20 @@ build_client:
 	@CGO_ENABLED=0 go build -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore ./cmd/bore
 
 build_ui_landing:
-	@if [ ! -d "web/bore-landing/dist" ]; then cd web/bore-landing && yarn build; fi
+	@if [ ! -d "web/bore/dist" ]; then cd web/bore && yarn build; fi
 
 wire:
 	@wire ./cmd/bore-server
 
 statik_landing: build_ui_landing
-	@if [ ! -r "internal/ui/landing/statik.go" ]; then statik -dest ./internal/ui -p landing -src ./web/bore-landing/dist; fi
+	@if [ ! -r "internal/ui/landing/statik.go" ]; then statik -dest ./internal/ui -p landing -src ./web/bore/dist; fi
 
 install_dependencies:
 	@go get github.com/jkuri/statik github.com/google/wire/cmd/... github.com/mitchellh/gox
+	@cd web/bore && yarn install
 
 clean:
-	@rm -rf build/ internal/ui web/bore-landing/dist
+	@rm -rf build/ internal/ui web/bore/dist
 
 release: statik_landing wire
 	@gox -os=${OS} -arch=${ARCH} -osarch=${OSARCH} -output "${RELEASE_DIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" ./cmd/bore ./cmd/bore-server

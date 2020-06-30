@@ -1,4 +1,4 @@
 build/
 .DS_Store/
 internal/ui
-web/bore-landing/node_modules/
+web/bore/node_modules/

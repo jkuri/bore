@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "bore-landing": {
+    "bore": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -44,7 +44,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/bore-landing",
+            "outputPath": "dist/bore",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -99,22 +99,22 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "bore-landing:build"
+            "browserTarget": "bore:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "bore-landing:build:production"
+              "browserTarget": "bore:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "bore-landing:build"
+            "browserTarget": "bore:build"
           }
         }
       }
     }
   },
-  "defaultProject": "bore-landing"
+  "defaultProject": "bore"
 }
