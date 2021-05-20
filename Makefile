@@ -16,7 +16,7 @@ build_client:
 	@CGO_ENABLED=0 go build -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore ./cmd/bore
 
 build_ui_landing:
-	@if [ ! -d "web/bore/dist" ]; then cd web/bore && yarn build; fi
+	@if [ ! -d "web/bore/dist" ]; then cd web/bore && npm run build; fi
 
 wire:
 	@wire ./cmd/bore-server
@@ -26,7 +26,7 @@ statik_landing: build_ui_landing
 
 install_dependencies:
 	@go get github.com/jkuri/statik github.com/google/wire/cmd/... github.com/mitchellh/gox
-	@cd web/bore && yarn install
+	@cd web/bore && npm install
 
 clean:
 	@rm -rf build/ internal/ui web/bore/dist
