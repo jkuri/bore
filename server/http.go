@@ -37,7 +37,7 @@ func (h *HTTPServer) Run(addr string, handler http.Handler) error {
 	h.Handler = handler
 	h.listener = listener
 
-	h.logger.Infof("Starting HTTP server on %s", addr)
+	h.logger.Infof("starting HTTP server on %s", addr)
 
 	go h.closeWith(h.Serve(listener))
 	return nil

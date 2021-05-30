@@ -20,6 +20,11 @@ type BoreClient struct {
 	LocalEndpoint  endpoint // local service to be forwarded
 	ServerEndpoint endpoint // remote SSH server
 	RemoteEndpoint endpoint // remote forwarding port (on remote SSH server network)
+	id             string
+}
+
+type idRequestPayload struct {
+	ID string
 }
 
 // NewBoreClient returns new instance of BoreClient.
@@ -30,6 +35,7 @@ func NewBoreClient(config Config) BoreClient {
 		ServerEndpoint: endpoint{config.RemoteServer, config.RemotePort},
 		RemoteEndpoint: endpoint{"0.0.0.0", config.BindPort},
 		sshConfig:      &ssh.ClientConfig{HostKeyCallback: ssh.InsecureIgnoreHostKey()},
+		id:             config.ID,
 	}
 }
 
@@ -47,6 +53,11 @@ func (c *BoreClient) Run() error {
 	done := make(chan struct{})
 	if c.config.KeepAlive {
 		go keepAliveTicker(c.sshClient, done)
+	}
+
+	_, _, err = c.sshClient.SendRequest("set-id", false, ssh.Marshal(&idRequestPayload{c.id}))
+	if err != nil {
+		return err
 	}
 
 	if err := c.writeStdout(); err != nil {

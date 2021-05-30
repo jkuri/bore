@@ -23,3 +23,7 @@ type tcpIPForwardPayload struct {
 type tcpIPForwardPayloadReply struct {
 	Port uint32
 }
+
+type idRequestPayload struct {
+	ID string
+}

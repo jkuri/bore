@@ -25,6 +25,8 @@ Options:
 
 -bp, Remote TCP bind port, (default: 0 (random))
 
+-id, ID to use when generating URL (default: "" (random))
+
 -a, Keep tunnel connection alive (default: true)
 
 -version, prints bore version and build info
@@ -39,6 +41,7 @@ var (
 	localServer  = flag.String("ls", "localhost", "")
 	localPort    = flag.Int("lp", 80, "")
 	bindPort     = flag.Int("bp", 0, "")
+	id           = flag.String("id", "", "")
 	keepAlive    = flag.Bool("a", true, "")
 	versionFlag  = flag.Bool("version", false, "version")
 )
@@ -61,6 +64,7 @@ func main() {
 		LocalServer:  *localServer,
 		LocalPort:    *localPort,
 		BindPort:     *bindPort,
+		ID:           *id,
 		KeepAlive:    *keepAlive,
 	})
 

@@ -7,5 +7,6 @@ type Config struct {
 	LocalServer  string
 	LocalPort    int
 	BindPort     int
+	ID           string
 	KeepAlive    bool
 }

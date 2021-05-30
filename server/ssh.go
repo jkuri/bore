@@ -180,6 +180,23 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 	for req := range reqs {
 		client.tcpConn.SetDeadline(time.Now().Add(2 * time.Minute))
 
+		if req.Type == "set-id" {
+			var payload idRequestPayload
+			if err := ssh.Unmarshal(req.Payload, &payload); err != nil {
+				s.logger.Errorf("[%s] Unable to unmarshal payload: %v", client.id, err)
+			}
+			if payload.ID != "" {
+				if _, ok := s.clients[payload.ID]; !ok {
+					s.mu.Lock()
+					delete(s.clients, client.id)
+					client.id = payload.ID
+					s.clients[client.id] = client
+					s.mu.Unlock()
+				}
+			}
+			continue
+		}
+
 		if req.Type == "tcpip-forward" {
 			listener, bindInfo, err := s.handleForward(client, req)
 			if err != nil {
@@ -243,7 +260,7 @@ func (s *SSHServer) handleForwardTCPIP(client *client, bindInfo *bindInfo, conn 
 		conn.Close()
 		return
 	}
-	s.logger.Debugf("[%s] Channel opened for client %s:%d <-> %s", client.id, bindInfo.Addr, bindInfo.Port, remoteAddr.String())
+	s.logger.Debugf("[%s] channel opened for client %s:%d <-> %s", client.id, bindInfo.Addr, bindInfo.Port, remoteAddr.String())
 	go ssh.DiscardRequests(requests)
 	go s.handleForwardTCPIPTransfer(c, conn)
 }
@@ -251,12 +268,12 @@ func (s *SSHServer) handleForwardTCPIP(client *client, bindInfo *bindInfo, conn 
 func (s *SSHServer) handleForward(client *client, req *ssh.Request) (net.Listener, *bindInfo, error) {
 	var payload tcpIPForwardPayload
 	if err := ssh.Unmarshal(req.Payload, &payload); err != nil {
-		s.logger.Errorf("[%s] Unable to unmarshal payload: %v", client.id, err)
+		s.logger.Errorf("[%s] unable to unmarshal payload: %v", client.id, err)
 		req.Reply(false, []byte{})
 		return nil, nil, fmt.Errorf("unable to parse payload")
 	}
 
-	s.logger.Debugf("[%s] Request: %s %v %v", client.id, req.Type, req.WantReply, payload)
+	s.logger.Debugf("[%s] request: %s %v %v", client.id, req.Type, req.WantReply, payload)
 
 listen:
 	bind := fmt.Sprintf("%s:%d", payload.Addr, payload.Port)
