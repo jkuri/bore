@@ -194,6 +194,7 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 					s.mu.Unlock()
 				}
 			}
+			req.Reply(true, []byte{})
 			continue
 		}
 

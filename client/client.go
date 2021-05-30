@@ -55,9 +55,11 @@ func (c *BoreClient) Run() error {
 		go keepAliveTicker(c.sshClient, done)
 	}
 
-	_, _, err = c.sshClient.SendRequest("set-id", false, ssh.Marshal(&idRequestPayload{c.id}))
-	if err != nil {
-		return err
+	if c.id != "" {
+		_, _, err = c.sshClient.SendRequest("set-id", true, ssh.Marshal(&idRequestPayload{c.id}))
+		if err != nil {
+			return err
+		}
 	}
 
 	if err := c.writeStdout(); err != nil {

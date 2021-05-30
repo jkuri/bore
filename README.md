@@ -1,20 +1,21 @@
 # bore
 
-Reverse HTTP proxy tunnel via secure SSH connections.
+Reverse HTTP/TCP proxy tunnel via secure SSH connections.
 
 ## Installation
 
 First, clone repository
 
 ```sh
-$ git clone https://github.com/jkuri/bore.git
+git clone https://github.com/jkuri/bore.git
 ```
 
 Then install client:
 
 ```sh
-$ cd bore
-$ go install ./cmd/bore
+make install_dependencies
+make
+cp ./build/bore /usr/local/bin/bore
 ```
 
 This will compile and install `bore` client locally.
@@ -24,7 +25,7 @@ This will compile and install `bore` client locally.
 Let's say you are running HTTP server locally on port 6500, then command would be:
 
 ```sh
-$ bore -s bore.network -p 2200 -ls localhost -lp 6500
+bore -s bore.network -p 2200 -ls localhost -lp 6500
 ```
 
 2200 is port where bore-server is running and localhost:6500 is local HTTP server.
@@ -32,35 +33,35 @@ $ bore -s bore.network -p 2200 -ls localhost -lp 6500
 Example output:
 
 ```sh
-$ bore -s bore.network -p 2200 -ls localhost -lp 6500
+bore -s bore.network -p 2200 -ls localhost -lp 6500
 Generated URL: https://88bed6a6.bore.network
 ```
 
-Then open generated URL in the browser to check if works, then share the URL if needed.
+Then open generated URL in the browser to check if it works, then share the URL if needed.
 
 ## Running Server
 
 ### Run Compilation
 
 ```sh
-$ make install_dependencies
-$ make
+make install_dependencies
+make
 ```
 
 ### Running bore-server example
 
 ```sh
-$ BORE_DOMAIN=bore.network BORE_HTTPADDR=0.0.0.0:80 BORE_SSHADDR=0.0.0.0:2200 ./build/bore-server
+BORE_DOMAIN=bore.network BORE_HTTPADDR=0.0.0.0:80 BORE_SSHADDR=0.0.0.0:2200 ./build/bore-server
 ```
 
 This will generate initial config at `~/bore/bore-server.yaml` with values you provided over environment variables.
 
 ## License
 
-```
+```license
 MIT License
 
-Copyright (c) 2020 Jan Kuri <jkuri88@gmail.com>
+Copyright (c) 2020-2021 Jan Kuri <jkuri88@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
