@@ -130,7 +130,7 @@ func (s *BoreServer) handleHTTP() http.Handler {
 			}
 
 			url := &url.URL{Scheme: r.URL.Scheme, Host: s.opts.Domain, Path: "not-found", RawQuery: fmt.Sprintf("tunnelID=%s", userID)}
-			http.Redirect(w, r, url.String(), 301)
+			http.Redirect(w, r, url.String(), http.StatusMovedPermanently)
 			return
 		}
 

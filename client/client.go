@@ -28,7 +28,7 @@ func NewBoreClient(config Config) BoreClient {
 		config:         config,
 		LocalEndpoint:  endpoint{config.LocalServer, config.LocalPort},
 		ServerEndpoint: endpoint{config.RemoteServer, config.RemotePort},
-		RemoteEndpoint: endpoint{"127.0.0.1", config.BindPort},
+		RemoteEndpoint: endpoint{"0.0.0.0", config.BindPort},
 		sshConfig:      &ssh.ClientConfig{HostKeyCallback: ssh.InsecureIgnoreHostKey()},
 	}
 }

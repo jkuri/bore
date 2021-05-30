@@ -197,7 +197,7 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 			client.addr = bindInfo.Addr
 			client.port = bindInfo.Port
 
-			client.write(fmt.Sprintf("Direct TCP: tcp://%s.%s:%d\n", client.id, s.domain, client.port))
+			client.write(fmt.Sprintf("Direct TCP: tcp://%s.%s:%d\n\n", client.id, s.domain, client.port))
 
 			client.mu.Lock()
 			client.listeners[bindInfo.Bound] = listener
