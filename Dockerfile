@@ -1,6 +1,6 @@
 FROM golang:1.14-alpine as build
 
-RUN apk add --no-cache git make ca-certificates alpine-sdk yarn
+RUN apk add --no-cache git make ca-certificates alpine-sdk npm
 
 COPY . /app
 
