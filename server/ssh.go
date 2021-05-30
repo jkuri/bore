@@ -205,9 +205,9 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 			client.addr = bindInfo.Addr
 			client.port = bindInfo.Port
 
-			client.write(fmt.Sprintf("Generated HTTP URL: http://%s.%s\n", client.id, s.domain))
+			client.write(fmt.Sprintf("Generated HTTP URL:  http://%s.%s\n", client.id, s.domain))
 			client.write(fmt.Sprintf("Generated HTTPS URL: https://%s.%s\n", client.id, s.domain))
-			client.write(fmt.Sprintf("Direct TCP: tcp://%s:%d\n\n", s.domain, client.port))
+			client.write(fmt.Sprintf("Direct TCP:          tcp://%s:%d\n\n", s.domain, client.port))
 
 			client.mu.Lock()
 			client.listeners[bindInfo.Bound] = listener
