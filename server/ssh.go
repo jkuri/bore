@@ -171,15 +171,8 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 		}
 		client.ch = chconn
 
-		_, port, _ := net.SplitHostPort(s.opts.HTTPAddr)
-		if port == "80" {
-			port = ""
-		} else {
-			port = fmt.Sprintf(":%s", port)
-		}
-
-		client.write(fmt.Sprintf("Generated HTTP URL: http://%s.%s%s\n", client.id, s.domain, port))
-		client.write(fmt.Sprintf("Generated HTTPS URL: https://%s.%s%s\n", client.id, s.domain, port))
+		client.write(fmt.Sprintf("Generated HTTP URL: http://%s.%s\n", client.id, s.domain))
+		client.write(fmt.Sprintf("Generated HTTPS URL: https://%s.%s\n", client.id, s.domain))
 	}
 }
 
