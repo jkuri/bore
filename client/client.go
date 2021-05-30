@@ -4,18 +4,12 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math/rand"
 	"net"
 	"os"
 	"os/signal"
 	"time"
 
 	"golang.org/x/crypto/ssh"
-)
-
-const (
-	minPort = 55000
-	maxPort = 65000
 )
 
 // BoreClient defines bore client.
@@ -34,7 +28,7 @@ func NewBoreClient(config Config) BoreClient {
 		config:         config,
 		LocalEndpoint:  endpoint{config.LocalServer, config.LocalPort},
 		ServerEndpoint: endpoint{config.RemoteServer, config.RemotePort},
-		RemoteEndpoint: endpoint{"127.0.0.1", randomPort(minPort, maxPort)},
+		RemoteEndpoint: endpoint{"127.0.0.1", config.BindPort},
 		sshConfig:      &ssh.ClientConfig{HostKeyCallback: ssh.InsecureIgnoreHostKey()},
 	}
 }
@@ -144,9 +138,4 @@ func keepAliveTicker(client *ssh.Client, done <-chan struct{}) error {
 			return nil
 		}
 	}
-}
-
-func randomPort(min, max int) int {
-	rand.Seed(time.Now().Unix())
-	return rand.Intn(max-min) + min
 }

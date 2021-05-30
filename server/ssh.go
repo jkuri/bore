@@ -13,6 +13,11 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+const (
+	minPort = 55000
+	maxPort = 65000
+)
+
 // SSHServer defines SSH server instance.
 type SSHServer struct {
 	mu        sync.Mutex
@@ -39,7 +44,9 @@ type client struct {
 }
 
 func (c *client) write(data string) {
-	io.WriteString(c.ch, data)
+	if c.ch != nil {
+		io.WriteString(c.ch, data)
+	}
 }
 
 // NewSSHServer returns new instance of SSHServer.
@@ -103,12 +110,12 @@ func (s *SSHServer) listen() error {
 	}
 	s.listener = listener
 
-	s.logger.Infof("Starting SSH server on %s", s.addr)
+	s.logger.Infof("starting SSH server on %s", s.addr)
 
 	for {
 		tcpConn, err := s.listener.Accept()
 		if err != nil {
-			s.logger.Errorf("Failed to accept incoming connection: %v", err)
+			s.logger.Errorf("failed to accept incoming connection: %v", err)
 			continue
 		}
 
@@ -132,7 +139,7 @@ func (s *SSHServer) listen() error {
 			addr:      "",
 			port:      0,
 		}
-		s.logger.Infof("New SSH connection from %s (%s)", sshConn.RemoteAddr().String(), sshConn.ClientVersion())
+		s.logger.Infof("new SSH connection from %s (%s)", sshConn.RemoteAddr().String(), sshConn.ClientVersion())
 
 		go func(c *client) {
 			err := c.sshConn.Wait()
@@ -140,7 +147,7 @@ func (s *SSHServer) listen() error {
 
 			c.mu.Lock()
 			for bind, listener := range c.listeners {
-				s.logger.Debugf("[%s] Closing listener bound to %s", c.id, bind)
+				s.logger.Debugf("[%s] closing listener bound to %s", c.id, bind)
 				listener.Close()
 			}
 			c.mu.Unlock()
@@ -159,7 +166,7 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 	for nch := range chans {
 		chconn, _, err := nch.Accept()
 		if err != nil {
-			s.logger.Errorf("[%s] Could not accept channel: %v", client.id, err)
+			s.logger.Errorf("[%s] could not accept channel: %v", client.id, err)
 			return
 		}
 		client.ch = chconn
@@ -170,8 +177,9 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 		} else {
 			port = fmt.Sprintf(":%s", port)
 		}
-		url := fmt.Sprintf("\nGenerated URL: http://%s.%s%s\n\n", client.id, s.domain, port)
-		io.WriteString(client.ch, url)
+
+		client.write(fmt.Sprintf("Generated HTTP URL: http://%s.%s%s\n", client.id, s.domain, port))
+		client.write(fmt.Sprintf("Generated HTTPS URL: https://%s.%s%s\n", client.id, s.domain, port))
 	}
 }
 
@@ -182,13 +190,14 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 		if req.Type == "tcpip-forward" {
 			listener, bindInfo, err := s.handleForward(client, req)
 			if err != nil {
-				s.logger.Errorf("[%s] Error, disconnecting: %v", client.id, err)
-				client.mu.Unlock()
+				s.logger.Errorf("[%s] error, disconnecting: %v", client.id, err)
 				client.tcpConn.Close()
 			}
 
 			client.addr = bindInfo.Addr
 			client.port = bindInfo.Port
+
+			client.write(fmt.Sprintf("Direct TCP: tcp://%s.%s:%d\n", client.id, s.domain, client.port))
 
 			client.mu.Lock()
 			client.listeners[bindInfo.Bound] = listener
@@ -211,11 +220,11 @@ func (s *SSHServer) handleListener(client *client, bindInfo *bindInfo, listener 
 		if err != nil {
 			neterr := err.(net.Error)
 			if neterr.Timeout() {
-				s.logger.Errorf("[%s] Accept failed with timeout: %v", client.id, err)
+				s.logger.Errorf("[%s] accept failed with timeout: %v", client.id, err)
 				continue
 			}
 			if neterr.Temporary() {
-				s.logger.Errorf("[%s] Accept failed with temporary: %v", client.id, err)
+				s.logger.Errorf("[%s] accept failed with temporary: %v", client.id, err)
 				continue
 			}
 
@@ -237,7 +246,7 @@ func (s *SSHServer) handleForwardTCPIP(client *client, bindInfo *bindInfo, conn 
 	// open channel with client
 	c, requests, err := client.sshConn.OpenChannel("forwarded-tcpip", mpayload)
 	if err != nil {
-		s.logger.Errorf("[%s] Unable to get channel: %v. Hanging up requesting party!", client.id, err)
+		s.logger.Errorf("[%s] unable to get channel: %v. Hanging up requesting party!", client.id, err)
 		conn.Close()
 		return
 	}
@@ -251,24 +260,33 @@ func (s *SSHServer) handleForward(client *client, req *ssh.Request) (net.Listene
 	if err := ssh.Unmarshal(req.Payload, &payload); err != nil {
 		s.logger.Errorf("[%s] Unable to unmarshal payload: %v", client.id, err)
 		req.Reply(false, []byte{})
-		return nil, nil, fmt.Errorf("Unable to parse payload")
+		return nil, nil, fmt.Errorf("unable to parse payload")
 	}
 
 	s.logger.Debugf("[%s] Request: %s %v %v", client.id, req.Type, req.WantReply, payload)
 
+listen:
 	bind := fmt.Sprintf("%s:%d", payload.Addr, payload.Port)
-	ln, err := net.Listen("tcp", bind)
-	if err != nil {
-		s.logger.Errorf("[%s] Listen failed for: %s %v", client.id, bind, err)
-		req.Reply(false, []byte{})
-		return nil, nil, err
+	if payload.Port == 0 {
+		bind = fmt.Sprintf("%s:%d", payload.Addr, randomPort(minPort, maxPort))
 	}
 
-	s.logger.Debugf("[%s] Listening on %s", client.id, bind)
-	reply := tcpIPForwardPayloadReply{payload.Port}
+	ln, err := net.Listen("tcp", bind)
+	if err != nil {
+		s.logger.Errorf("[%s] listen failed for: %s %v, retrying on another port", client.id, bind, err)
+		if payload.Port != 0 {
+			payload.Port = 0
+		}
+		goto listen
+	}
+	port := ln.Addr().(*net.TCPAddr).Port
+	bind = fmt.Sprintf("%s:%d", payload.Addr, port)
+
+	s.logger.Debugf("[%s] listening on %s", client.id, bind)
+	reply := tcpIPForwardPayloadReply{uint32(port)}
 	req.Reply(true, ssh.Marshal(&reply))
 
-	return ln, &bindInfo{bind, payload.Port, payload.Addr}, nil
+	return ln, &bindInfo{bind, uint32(port), payload.Addr}, nil
 }
 
 func (s *SSHServer) handleForwardTCPIPTransfer(c ssh.Channel, conn net.Conn) {

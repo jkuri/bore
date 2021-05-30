@@ -6,5 +6,6 @@ type Config struct {
 	RemotePort   int
 	LocalServer  string
 	LocalPort    int
+	BindPort     int
 	KeepAlive    bool
 }

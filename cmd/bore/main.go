@@ -23,6 +23,8 @@ Options:
 
 -lp, Local HTTP server port (default: 7500)
 
+-bp, Remote TCP bind port, (default: 0 (random))
+
 -a, Keep tunnel connection alive (default: true)
 
 -version, prints bore version and build info
@@ -36,6 +38,7 @@ var (
 	remotePort   = flag.Int("p", 2200, "")
 	localServer  = flag.String("ls", "localhost", "")
 	localPort    = flag.Int("lp", 80, "")
+	bindPort     = flag.Int("bp", 0, "")
 	keepAlive    = flag.Bool("a", true, "")
 	versionFlag  = flag.Bool("version", false, "version")
 )
@@ -57,6 +60,7 @@ func main() {
 		RemotePort:   *remotePort,
 		LocalServer:  *localServer,
 		LocalPort:    *localPort,
+		BindPort:     *bindPort,
 		KeepAlive:    *keepAlive,
 	})
 
