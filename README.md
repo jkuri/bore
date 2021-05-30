@@ -34,10 +34,39 @@ Example output:
 
 ```sh
 bore -s bore.network -p 2200 -ls localhost -lp 6500
-Generated URL: https://88bed6a6.bore.network
+
+Generated HTTP URL: http://918574de.bore.network
+Generated HTTPS URL: https://918574de.bore.network
+Direct TCP: tcp://bore.network:60637
 ```
 
 Then open generated URL in the browser to check if it works, then share the URL if needed.
+
+You can also request custom id instead of randomly generated one:
+
+```sh
+bore -lp 6500 -id myapp
+
+Generated HTTP URL: http://myapp.bore.network
+Generated HTTPS URL: https://myapp.bore.network
+Direct TCP: tcp://bore.network:55474
+```
+
+If custom requested ID is already taken, then random id is used.
+
+You can also specify custom remote bind listening port, which is useful for using direct TCP connection:
+
+```sh
+bore -lp 6500 -bp 55000
+
+Generated HTTP URL: http://fe2d57f3.bore.network
+Generated HTTPS URL: https://fe2d57f3.bore.network
+Direct TCP: tcp://bore.network:55000
+```
+
+Note that for hosted bore you need to specify port in range 55000-65000.
+
+If port is already taken, random port is used.
 
 ## Running Server
 
