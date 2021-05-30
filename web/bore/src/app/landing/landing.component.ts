@@ -8,7 +8,11 @@ import { tap, takeWhile, delay } from 'rxjs/operators';
 })
 export class LandingComponent implements OnInit, OnDestroy {
   command: string = 'bore -s bore.network -lp 8080';
-  result: string = 'Generated URL: https://532bbf43.bore.network';
+  result: string = [
+    'Generated HTTP URL:  http://532bbf43.bore.network',
+    'Generated HTTPS URL: https://532bbf43.bore.network',
+    'Direct TCP:          tcp://bore.network:60120'
+  ].join('\n');
   displayCommand: string = '';
   displayResult: string = '';
   sub = new Subscription();
