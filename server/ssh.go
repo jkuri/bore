@@ -121,7 +121,7 @@ func (s *SSHServer) listen() error {
 
 		sshConn, chans, reqs, err := ssh.NewServerConn(tcpConn, s.config)
 		if err != nil {
-			s.logger.Errorf("Failed to handshake: %v", err)
+			s.logger.Errorf("failed to handshake: %v", err)
 			continue
 		}
 
