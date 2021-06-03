@@ -1,10 +1,23 @@
-# bore
+<h1 align="center">bore</h1>
 
-Reverse HTTP/TCP proxy tunnel via secure SSH connections.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/1796022/120690493-93029500-c4a5-11eb-8a5c-c971911467cb.png" alt="bore-logo">
+</p>
+
+<p align="center">
+  <a href="https://bore.network"><strong>https://bore.network</strong></a>
+  <br>
+</p>
+
+<p align="center">Reverse HTTP/TCP proxy tunnel via secure SSH connections.</p>
 
 ## Installation
 
-First, clone repository
+You can download prebuild binaries [here](https://github.com/jkuri/bore/releases).
+
+### Build from source
+
+First, clone the repository
 
 ```sh
 git clone https://github.com/jkuri/bore.git
