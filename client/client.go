@@ -3,7 +3,6 @@ package client
 import (
 	"fmt"
 	"io"
-	"log"
 	"net"
 	"os"
 	"os/signal"
@@ -42,6 +41,7 @@ func NewBoreClient(config Config) BoreClient {
 // Run starts the client.
 func (c *BoreClient) Run() error {
 	ch := make(chan os.Signal, 1)
+	errch := make(chan error)
 	signal.Notify(ch, os.Interrupt)
 
 	client, err := ssh.Dial("tcp", c.ServerEndpoint.String(), c.sshConfig)
@@ -76,20 +76,26 @@ func (c *BoreClient) Run() error {
 		for {
 			local, err := net.Dial("tcp", c.LocalEndpoint.String())
 			if err != nil {
-				log.Fatal(err)
+				errch <- err
+				return
 			}
 
 			client, err := listener.Accept()
 			if err != nil {
-				log.Fatal(err)
+				errch <- err
+				return
 			}
 
 			go handleClient(client, local)
 		}
 	}()
 
-	<-ch
-	return nil
+	select {
+	case <-ch:
+		return nil
+	case err := <-errch:
+		return err
+	}
 }
 
 func (c *BoreClient) writeStdout() error {

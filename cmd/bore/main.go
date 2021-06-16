@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/jkuri/bore/client"
 	"github.com/jkuri/bore/internal/version"
@@ -29,6 +30,8 @@ Options:
 
 -a, Keep tunnel connection alive (default: true)
 
+-r, Auto-reconnect if connection failed (default: false)
+
 -version, prints bore version and build info
 
 Read more:
@@ -36,14 +39,15 @@ Read more:
 `
 
 var (
-	remoteServer = flag.String("s", "bore.network", "")
-	remotePort   = flag.Int("p", 2200, "")
-	localServer  = flag.String("ls", "localhost", "")
-	localPort    = flag.Int("lp", 80, "")
-	bindPort     = flag.Int("bp", 0, "")
-	id           = flag.String("id", "", "")
-	keepAlive    = flag.Bool("a", true, "")
-	versionFlag  = flag.Bool("version", false, "version")
+	remoteServer  = flag.String("s", "bore.network", "")
+	remotePort    = flag.Int("p", 2200, "")
+	localServer   = flag.String("ls", "localhost", "")
+	localPort     = flag.Int("lp", 80, "")
+	bindPort      = flag.Int("bp", 0, "")
+	id            = flag.String("id", "", "")
+	keepAlive     = flag.Bool("a", true, "")
+	autoReconnect = flag.Bool("r", false, "")
+	versionFlag   = flag.Bool("version", false, "version")
 )
 
 func main() {
@@ -68,8 +72,14 @@ func main() {
 		KeepAlive:    *keepAlive,
 	})
 
+connect:
 	if err := client.Run(); err != nil {
-		log.Fatal(err)
+		if !*autoReconnect {
+			log.Fatal(err)
+		}
+		log.Println("connection failed due: ", err.Error(), "reconnecting in 5s...")
+		time.Sleep(time.Second * 5)
+		goto connect
 	}
 
 	os.Exit(0)
