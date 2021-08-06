@@ -2,6 +2,7 @@ package server
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -9,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	c "github.com/jkuri/bore/client"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/ssh"
 )
@@ -43,9 +45,14 @@ type client struct {
 	port      uint32
 }
 
-func (c *client) write(data string) {
+func (c *client) write(data interface{}) {
 	if c.ch != nil {
-		io.WriteString(c.ch, data)
+		b, err := json.Marshal(data)
+		if err != nil {
+			io.WriteString(c.ch, data.(string)+"\n")
+			return
+		}
+		io.WriteString(c.ch, string(b)+"\n")
 	}
 }
 
@@ -205,10 +212,12 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 			client.addr = bindInfo.Addr
 			client.port = bindInfo.Port
 
-			client.write(fmt.Sprintf("Generated HTTP URL:  http://%s.%s\n", client.id, s.domain))
-			client.write(fmt.Sprintf("Generated HTTPS URL: https://%s.%s\n", client.id, s.domain))
-			client.write(fmt.Sprintf("Direct TCP:          tcp://%s:%d\n\n", s.domain, client.port))
+			var data c.Data
 
+			data.HTTPurl = fmt.Sprintf("http://%s.%s", client.id, s.domain)
+			data.HTTPSurl = fmt.Sprintf("https://%s.%s", client.id, s.domain)
+			data.DirectTCP = fmt.Sprintf("tcp://%s:%d", s.domain, client.port)
+			client.write(data)
 			client.mu.Lock()
 			client.listeners[bindInfo.Bound] = listener
 			client.mu.Unlock()
