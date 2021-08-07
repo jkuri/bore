@@ -214,9 +214,21 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 
 			var data c.Data
 
-			data.HTTPurl = fmt.Sprintf("http://%s.%s", client.id, s.domain)
-			data.HTTPSurl = fmt.Sprintf("https://%s.%s", client.id, s.domain)
-			data.DirectTCP = fmt.Sprintf("tcp://%s:%d", s.domain, client.port)
+			if s.opts.Protocols.HTTP {
+				data.HTTPurl = fmt.Sprintf("http://%s.%s", client.id, s.domain)
+			} else {
+				data.HTTPurl = "unsupported"
+			}
+			if s.opts.Protocols.HTTPS {
+				data.HTTPSurl = fmt.Sprintf("https://%s.%s", client.id, s.domain)
+			} else {
+				data.HTTPSurl = "unsupported"
+			}
+			if s.opts.Protocols.TCP {
+				data.DirectTCP = fmt.Sprintf("tcp://%s:%d", s.domain, client.port)
+			} else {
+				data.DirectTCP = "unsupported"
+			}
 			client.write(data)
 			client.mu.Lock()
 			client.listeners[bindInfo.Bound] = listener
