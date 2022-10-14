@@ -284,10 +284,10 @@ listen:
 	ln, err := net.Listen("tcp", bind)
 	if err != nil {
 		s.logger.Errorf("[%s] listen failed for: %s %v, retrying on another port", client.id, bind, err)
-		if payload.Port != 0 {
-			payload.Port = 0
+		if payload.Port == 0 {
+			goto listen
 		}
-		goto listen
+		return nil, nil, err
 	}
 	port := ln.Addr().(*net.TCPAddr).Port
 	bind = fmt.Sprintf("%s:%d", payload.Addr, port)
