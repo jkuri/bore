@@ -200,6 +200,7 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 			if err != nil {
 				s.logger.Errorf("[%s] error, disconnecting: %v", client.id, err)
 				client.tcpConn.Close()
+				continue
 			}
 
 			client.addr = bindInfo.Addr
