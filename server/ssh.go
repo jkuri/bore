@@ -288,7 +288,8 @@ listen:
 			goto listen
 		}
 		s.logger.Errorf("[%s] listen failed for: %s %v", client.id, bind, err)
-		return nil, nil, err
+		req.Reply(false, []byte{})
+		return nil, nil, fmt.Errorf("unable to listen")
 	}
 	port := ln.Addr().(*net.TCPAddr).Port
 	bind = fmt.Sprintf("%s:%d", payload.Addr, port)
