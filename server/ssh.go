@@ -283,10 +283,11 @@ listen:
 
 	ln, err := net.Listen("tcp", bind)
 	if err != nil {
-		s.logger.Errorf("[%s] listen failed for: %s %v, retrying on another port", client.id, bind, err)
 		if payload.Port == 0 {
+			s.logger.Errorf("[%s] listen failed for: %s %v, retrying on another port", client.id, bind, err)
 			goto listen
 		}
+		s.logger.Errorf("[%s] listen failed for: %s %v", client.id, bind, err)
 		return nil, nil, err
 	}
 	port := ln.Addr().(*net.TCPAddr).Port
