@@ -3,3 +3,4 @@ build/
 internal/ui
 web/bore/node_modules/
 web/bore/dist/
+.angular/

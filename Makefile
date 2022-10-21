@@ -27,6 +27,7 @@ statik_landing: build_ui_landing
 install_dependencies:
 	@go get github.com/jkuri/statik github.com/google/wire/cmd/... github.com/mitchellh/gox
 	@go install github.com/jkuri/statik
+	@go install github.com/google/wire/cmd/...
 	@cd web/bore && npm install
 
 clean:
