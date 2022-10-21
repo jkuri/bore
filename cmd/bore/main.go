@@ -16,7 +16,7 @@ Usage: bore [options]
 
 Options:
 
--s, SSH server remote host (default: bore.network)
+-s, SSH server remote host (default: bore.services)
 
 -p, SSH server remote port (default: 2200)
 
@@ -39,7 +39,7 @@ Read more:
 `
 
 var (
-	remoteServer  = flag.String("s", "bore.network", "")
+	remoteServer  = flag.String("s", "bore.services", "")
 	remotePort    = flag.Int("p", 2200, "")
 	localServer   = flag.String("ls", "localhost", "")
 	localPort     = flag.Int("lp", 80, "")
