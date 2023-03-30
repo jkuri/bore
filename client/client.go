@@ -40,6 +40,13 @@ func NewBoreClient(config Config) BoreClient {
 
 // Run starts the client.
 func (c *BoreClient) Run() error {
+	// Healthcheck
+	local, err := net.Dial("tcp", c.LocalEndpoint.String())
+	if err != nil {
+		return err
+	}
+	_ = local.Close()
+
 	ch := make(chan os.Signal, 1)
 	errch := make(chan error)
 	signal.Notify(ch, os.Interrupt)
