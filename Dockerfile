@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine as build
+FROM golang:1.20-alpine as build
 
 RUN apk add --no-cache git make ca-certificates alpine-sdk npm
 
@@ -8,7 +8,7 @@ WORKDIR /app
 
 RUN make install_dependencies && make statik_landing && make wire && make build_server
 
-FROM scratch
+FROM alpine:latest
 
 ENV BORE_DOMAIN=bore.services BORE_HTTPADDR=0.0.0.0:80
 
