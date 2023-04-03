@@ -1,7 +1,7 @@
 package version
 
 // Version represents current version.
-const Version = "0.4.1"
+const Version = "0.4.2"
 
 var (
 	// UIVersion is build time var and represents version of the user interface
