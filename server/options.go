@@ -21,6 +21,14 @@ type Options struct {
 	SSHAddr    string
 	HTTPAddr   string
 	Logger     *logger.Options
+	Protocols  *ProtocolOptions
+}
+
+// ProtocolOptions define which protocols are supported
+type ProtocolOptions struct {
+	TCP   bool
+	HTTP  bool
+	HTTPS bool
 }
 
 // NewConfig returns viper config.
@@ -43,6 +51,10 @@ func NewConfig(configPath string) (*viper.Viper, error) {
 	v.SetDefault("log.max_size", 500)
 	v.SetDefault("log.max_backups", 3)
 	v.SetDefault("log.max_age", 3)
+
+	v.SetDefault("protocols.tcp", true)
+	v.SetDefault("protocols.http", true)
+	v.SetDefault("protocols.https", true)
 
 	v.SetEnvPrefix("bore")
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

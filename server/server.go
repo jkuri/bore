@@ -97,7 +97,7 @@ func (s *BoreServer) getHandler(handler http.Handler) http.Handler {
 
 		userID := strings.Split(r.Host, ".")[0]
 		if client, ok := s.sshServer.clients[userID]; ok {
-			client.write(fmt.Sprintf("%s\n", log))
+			client.write(log)
 		}
 	})
 }
