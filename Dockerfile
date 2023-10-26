@@ -17,4 +17,4 @@ COPY --from=build /app/build/bore-server /bore-server
 
 EXPOSE 2000 2200 55000-65000
 
-CMD ["/bore-server", "-config", "/bore/bore-server.yaml"]
+CMD ["/bore-server"]
