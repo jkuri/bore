@@ -27,3 +27,9 @@ type tcpIPForwardPayloadReply struct {
 type idRequestPayload struct {
 	ID string
 }
+
+type clientResponse struct {
+	id     string
+	port   uint32
+	domain string
+}

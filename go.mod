@@ -3,6 +3,7 @@ module github.com/jkuri/bore
 go 1.16
 
 require (
+	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/felixge/httpsnoop v1.0.1
 	github.com/google/wire v0.5.0

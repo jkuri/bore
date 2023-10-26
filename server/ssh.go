@@ -1,11 +1,10 @@
 package server
 
 import (
-	"crypto/rand"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
+	"os"
 	"sync"
 	"time"
 
@@ -65,7 +64,7 @@ func NewSSHServer(opts *Options, logger *zap.SugaredLogger) *SSHServer {
 
 // Run starts the SSH server.
 func (s *SSHServer) Run() error {
-	privateKeyContent, err := ioutil.ReadFile(s.opts.PrivateKey)
+	privateKeyContent, err := os.ReadFile(s.opts.PrivateKey)
 	if err != nil {
 		return err
 	}
@@ -206,10 +205,6 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 			client.addr = bindInfo.Addr
 			client.port = bindInfo.Port
 
-			client.write(fmt.Sprintf("Generated HTTP URL:  http://%s.%s\n", client.id, s.domain))
-			client.write(fmt.Sprintf("Generated HTTPS URL: https://%s.%s\n", client.id, s.domain))
-			client.write(fmt.Sprintf("Direct TCP:          tcp://%s:%d\n\n", s.domain, client.port))
-
 			client.mu.Lock()
 			client.listeners[bindInfo.Bound] = listener
 			client.mu.Unlock()
@@ -219,6 +214,17 @@ func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
 			s.mu.Unlock()
 
 			go s.handleListener(client, bindInfo, listener)
+
+			if client.ch != nil {
+				data := clientResponse{
+					id:     client.id,
+					domain: s.domain,
+					port:   client.port,
+				}
+
+				renderMessage(data, client.ch)
+				renderTable(data, client.ch)
+			}
 		} else {
 			req.Reply(false, []byte{})
 		}
@@ -318,10 +324,4 @@ func (s *SSHServer) handleForwardTCPIPTransfer(c ssh.Channel, conn net.Conn) {
 	}()
 
 	<-done
-}
-
-func randID() string {
-	b := make([]byte, 4)
-	rand.Read(b)
-	return fmt.Sprintf("%x", b)
 }
