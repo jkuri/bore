@@ -103,7 +103,7 @@ This will generate initial config at `~/bore/bore-server.yaml` with values you p
 ```license
 MIT License
 
-Copyright (c) 2020-2021 Jan Kuri <jkuri88@gmail.com>
+Copyright (c) 2020-2023 Jan Kuri <jkuri88@gmail.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
