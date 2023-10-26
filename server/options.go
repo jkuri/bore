@@ -32,7 +32,7 @@ func NewConfig(configPath string) (*viper.Viper, error) {
 	v.SetConfigName("bore-server")
 	v.SetConfigType("yaml")
 
-	v.SetDefault("domain", "bore.services")
+	v.SetDefault("domain", "bore.digital")
 	v.SetDefault("privatekey", filepath.Join(dir, "id_rsa"))
 	v.SetDefault("publickey", filepath.Join(dir, "id_rsa.pub"))
 	v.SetDefault("sshaddr", "0.0.0.0:2200")

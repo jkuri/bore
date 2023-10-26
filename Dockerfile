@@ -10,7 +10,7 @@ RUN make install_dependencies && make statik_landing && make wire && make build_
 
 FROM alpine:latest
 
-ENV BORE_DOMAIN=bore.services BORE_HTTPADDR=0.0.0.0:2000
+ENV BORE_DOMAIN=bore.digital BORE_HTTPADDR=0.0.0.0:2000
 
 COPY --from=build /etc/ssl/certs /etc/ssl/certs
 COPY --from=build /app/build/bore-server /bore-server
