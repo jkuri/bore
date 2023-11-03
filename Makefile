@@ -34,6 +34,6 @@ clean:
 	@rm -rf build/ internal/ui web/bore/dist
 
 release: statik_landing wire
-	@gox -os=${OS} -arch=${ARCH} -osarch=${OSARCH} -output "${RELEASE_DIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" ./cmd/bore ./cmd/bore-server
+	@CGO_ENABLED=0 gox -os=${OS} -arch=${ARCH} -osarch=${OSARCH} -output "${RELEASE_DIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" ./cmd/bore ./cmd/bore-server
 
 .PHONY: wire build_server build_client build build_ui_landing statik_landing clean release
