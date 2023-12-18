@@ -12,6 +12,6 @@ require (
 	github.com/spf13/viper v1.7.0
 	github.com/yhat/wsutil v0.0.0-20170731153501-1d66fa95c997
 	go.uber.org/zap v1.15.0
-	golang.org/x/crypto v0.1.0
+	golang.org/x/crypto v0.17.0
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )
