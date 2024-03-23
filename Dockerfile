@@ -1,4 +1,4 @@
-FROM golang:1.21-alpine as build
+FROM golang:1.22-alpine as build
 
 RUN apk add --no-cache git make ca-certificates alpine-sdk npm
 
