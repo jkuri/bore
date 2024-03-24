@@ -1,21 +1,21 @@
 import { GitHubLogoIcon } from '@radix-ui/react-icons';
+import { NavLink } from 'react-router-dom';
 
 export default function Header(): React.JSX.Element {
   return (
     <header className="absolute inset-x-0 top-0 z-50">
-      <nav className="flex items-center justify-between p-3 lg:px-8">
+      <nav className="mx-auto flex max-w-4xl items-center justify-between p-4">
         <div className="flex flex-1">
-          <a href="/" className="-m-1.5 p-1.5">
-            <span className="sr-only">Bore</span>
-            <img className="h-10 w-auto" src="/bore-logo.svg" alt="" />
-          </a>
+          <NavLink to="/">
+            <img className="h-8" src="/bore.svg" alt="Bore" />
+          </NavLink>
         </div>
         <div className="flex items-center justify-end">
           <a
             href="https://github.com/jkuri/bore"
-            className="text-sm font-semibold leading-6 text-gray-900"
+            className="text-green-600 transition-colors hover:text-green-500"
           >
-            <GitHubLogoIcon className="h-8 w-8" />
+            <GitHubLogoIcon className="h-6 w-6" />
           </a>
         </div>
       </nav>
