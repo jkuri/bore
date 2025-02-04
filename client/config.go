@@ -9,4 +9,5 @@ type Config struct {
 	BindPort     int
 	ID           string
 	KeepAlive    bool
+	Password     string
 }

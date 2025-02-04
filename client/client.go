@@ -20,10 +20,15 @@ type BoreClient struct {
 	ServerEndpoint endpoint // remote SSH server
 	RemoteEndpoint endpoint // remote forwarding port (on remote SSH server network)
 	id             string
+	Password       string
 }
 
 type idRequestPayload struct {
 	ID string
+}
+
+type passwordRequestPayload struct {
+	Password string
 }
 
 // NewBoreClient returns new instance of BoreClient.
@@ -35,6 +40,7 @@ func NewBoreClient(config Config) BoreClient {
 		RemoteEndpoint: endpoint{"0.0.0.0", config.BindPort},
 		sshConfig:      &ssh.ClientConfig{HostKeyCallback: ssh.InsecureIgnoreHostKey()},
 		id:             config.ID,
+		Password:       config.Password,
 	}
 }
 
@@ -60,6 +66,16 @@ func (c *BoreClient) Run() error {
 	done := make(chan struct{})
 	if c.config.KeepAlive {
 		go keepAliveTicker(c.sshClient, done)
+	}
+
+	if c.config.Password != "" {
+		ok, _, err := c.sshClient.SendRequest("password", true, ssh.Marshal(&passwordRequestPayload{c.Password}))
+		if err != nil {
+			return fmt.Errorf("failed to send password: %w", err)
+		}
+		if !ok {
+			return fmt.Errorf("authentication failed: incorrect password")
+		}
 	}
 
 	if c.id != "" {

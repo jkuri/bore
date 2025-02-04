@@ -28,6 +28,10 @@ type idRequestPayload struct {
 	ID string
 }
 
+type passwordRequestPayload struct {
+	Password string
+}
+
 type clientResponse struct {
 	id     string
 	port   uint32

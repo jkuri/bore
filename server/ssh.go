@@ -28,6 +28,7 @@ type SSHServer struct {
 	clients   map[string]*client
 	addr      string
 	domain    string
+	password  string
 	logger    *zap.SugaredLogger
 }
 
@@ -40,6 +41,7 @@ type client struct {
 	listeners map[string]net.Listener
 	addr      string
 	port      uint32
+	password  string
 }
 
 func (c *client) write(data string) {
@@ -75,6 +77,7 @@ func (s *SSHServer) Run() error {
 	s.config.AddHostKey(private)
 	s.addr = s.opts.SSHAddr
 	s.domain = s.opts.Domain
+	s.password = s.opts.Password
 
 	go s.closeWith(s.listen())
 	return nil
@@ -137,6 +140,7 @@ func (s *SSHServer) listen() error {
 			listeners: make(map[string]net.Listener),
 			addr:      "",
 			port:      0,
+			password:  s.password,
 		}
 		s.logger.Infof("new SSH connection from %s (%s)", sshConn.RemoteAddr().String(), sshConn.ClientVersion())
 
@@ -173,8 +177,38 @@ func (s *SSHServer) handleChannels(client *client, chans <-chan ssh.NewChannel) 
 }
 
 func (s *SSHServer) handleRequests(client *client, reqs <-chan *ssh.Request) {
+	authenticated := s.password == ""
+
 	for req := range reqs {
 		client.tcpConn.SetDeadline(time.Now().Add(2 * time.Minute))
+
+		if !authenticated {
+			if req.Type != "password" {
+				req.Reply(false, nil)
+				s.logger.Errorf("[%s] error: password authentication required", client.id)
+				client.tcpConn.Close()
+				return
+			}
+
+			var payload passwordRequestPayload
+			if err := ssh.Unmarshal(req.Payload, &payload); err != nil {
+				s.logger.Errorf("[%s] Unable to unmarshal payload: %v", client.id, err)
+				req.Reply(false, nil)
+				client.tcpConn.Close()
+				return
+			}
+
+			if payload.Password != s.password {
+				req.Reply(false, nil)
+				s.logger.Errorf("[%s] error, disconnecting: wrong password", client.id)
+				client.tcpConn.Close()
+				return
+			}
+
+			authenticated = true
+			req.Reply(true, nil)
+			continue
+		}
 
 		if req.Type == "set-id" {
 			var payload idRequestPayload

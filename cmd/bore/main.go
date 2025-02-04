@@ -28,6 +28,8 @@ Options:
 
 -id, ID to use when generating URL (default: "" (random))
 
+-pw, Password for remote server authentication (default: "")
+
 -a, Keep tunnel connection alive (default: true)
 
 -r, Auto-reconnect if connection failed (default: false)
@@ -45,6 +47,7 @@ var (
 	localPort     = flag.Int("lp", 80, "")
 	bindPort      = flag.Int("bp", 0, "")
 	id            = flag.String("id", "", "")
+	password      = flag.String("pw", "", "")
 	keepAlive     = flag.Bool("a", true, "")
 	autoReconnect = flag.Bool("r", false, "")
 	versionFlag   = flag.Bool("version", false, "version")
@@ -69,6 +72,7 @@ func main() {
 		LocalPort:    *localPort,
 		BindPort:     *bindPort,
 		ID:           *id,
+		Password:     *password,
 		KeepAlive:    *keepAlive,
 	})
 

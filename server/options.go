@@ -20,6 +20,7 @@ type Options struct {
 	PublicKey  string
 	SSHAddr    string
 	HTTPAddr   string
+	Password   string
 	Logger     *logger.Options
 }
 
@@ -37,6 +38,7 @@ func NewConfig(configPath string) (*viper.Viper, error) {
 	v.SetDefault("publickey", filepath.Join(dir, "id_rsa.pub"))
 	v.SetDefault("sshaddr", "0.0.0.0:2200")
 	v.SetDefault("httpaddr", "0.0.0.0:2000")
+	v.SetDefault("password", "")
 	v.SetDefault("log.level", "debug")
 	v.SetDefault("log.stdout", true)
 	v.SetDefault("log.filename", filepath.Join(dir, "bore-server.log"))
