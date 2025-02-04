@@ -98,6 +98,21 @@ BORE_DOMAIN=bore.digital BORE_HTTPADDR=0.0.0.0:80 BORE_SSHADDR=0.0.0.0:2200 ./bu
 
 This will generate initial config at `~/bore/bore-server.yaml` with values you provided over environment variables.
 
+## Running With Password Authentication
+To enable password authentication, you can set it up with the `BORE_PASSWORD` environment variable:
+
+### Server Side 
+```sh 
+BORE_DOMAIN=example.com BORE_HTTPADDR=0.0.0.0:80 BORE_SSHADDR=0.0.0.0:2200 BORE_PASSWORD=mysecreetpassword ./build/bore-server
+```
+### Client Side
+Use the `-pw` flag to provide the password when connecting to the server:
+
+```sh
+bore -s example.com -p 2200 -ls localhost -lp 6500 -pw mysecreetpassword
+```
+If the password is incorrect or not provided when required, the connection will be rejected with an authentication error.
+
 ## License
 
 ```license
