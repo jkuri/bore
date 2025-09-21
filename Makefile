@@ -4,16 +4,16 @@ GIT_COMMIT=$(shell git rev-list -1 HEAD)
 BUILD_DATE=$(shell date +%FT%T%z)
 RELEASE_DIR=build/release
 OS="darwin freebsd linux windows"
-ARCH="amd64 arm"
+ARCH="amd64 arm arm64"
 OSARCH="!darwin/arm !windows/arm"
 
 build: statik_landing wire build_server build_client
 
 build_server:
-	@CGO_ENABLED=0 go build -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore-server ./cmd/bore-server
+	@CGO_ENABLED=0 go build -ldflags "-s -w -X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore-server ./cmd/bore-server
 
 build_client:
-	@CGO_ENABLED=0 go build -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore ./cmd/bore
+	@CGO_ENABLED=0 go build -ldflags "-s -w -X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" -o ./build/bore ./cmd/bore
 
 build_ui_landing:
 	@if [ ! -d "web/bore/dist" ]; then cd web/bore && npm run build; fi
@@ -34,6 +34,6 @@ clean:
 	@rm -rf build/ internal/ui web/bore/dist
 
 release: statik_landing wire
-	@CGO_ENABLED=0 gox -os=${OS} -arch=${ARCH} -osarch=${OSARCH} -output "${RELEASE_DIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" ./cmd/bore ./cmd/bore-server
+	@CGO_ENABLED=0 gox -os=${OS} -arch=${ARCH} -osarch=${OSARCH} -output "${RELEASE_DIR}/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-s -w -X ${VERSION_PATH}.GitCommit=${GIT_COMMIT} -X ${VERSION_PATH}.UIVersion=${UI_VERSION} -X ${VERSION_PATH}.BuildDate=${BUILD_DATE}" ./cmd/bore ./cmd/bore-server
 
 .PHONY: wire build_server build_client build build_ui_landing statik_landing clean release
