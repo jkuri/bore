@@ -2,8 +2,8 @@ import {
   ArrowRightIcon,
   DownloadIcon,
   LockClosedIcon,
-  RocketIcon
-} from '@radix-ui/react-icons';
+  RocketIcon,
+} from "@radix-ui/react-icons";
 import {
   FlaskConical,
   GitFork,
@@ -12,8 +12,8 @@ import {
   Monitor,
   Presentation,
   Server,
-  Terminal
-} from 'lucide-react';
+  Terminal,
+} from "lucide-react";
 
 export default function Landing(): React.JSX.Element {
   return (
@@ -30,13 +30,13 @@ export default function Landing(): React.JSX.Element {
         </div>
 
         <div className="space-y-4 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-zinc-900 sm:text-6xl">
+          <h1 className="font-bold text-4xl text-zinc-900 tracking-tight sm:text-6xl">
             Expose local servers
             <br />
             behind NAT and firewalls
           </h1>
 
-          <p className="mx-auto max-w-2xl text-lg leading-8 text-zinc-600">
+          <p className="mx-auto max-w-2xl text-lg text-zinc-600 leading-8">
             A simple command-line tool for creating secure SSH tunnels to share
             your local development server with anyone, anywhere.
           </p>
@@ -45,14 +45,14 @@ export default function Landing(): React.JSX.Element {
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="https://github.com/jkuri/bore/releases"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-zinc-900 px-8 text-sm font-medium text-zinc-50 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-zinc-900 px-8 font-medium text-sm text-zinc-50 transition-colors hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
           >
             <DownloadIcon className="h-4 w-4" />
             Get Started
           </a>
           <a
             href="https://github.com/jkuri/bore"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-8 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-8 font-medium text-sm text-zinc-900 transition-colors hover:bg-zinc-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950"
           >
             View on GitHub
             <ArrowRightIcon className="h-4 w-4" />
@@ -62,7 +62,7 @@ export default function Landing(): React.JSX.Element {
 
       <div className="mx-auto max-w-3xl">
         <div className="overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50">
-          <div className="border-b border-zinc-200 bg-white px-4 py-2">
+          <div className="border-zinc-200 border-b bg-white px-4 py-2">
             <div className="flex items-center gap-2">
               <div className="flex gap-1.5">
                 <div className="h-3 w-3 rounded-full bg-zinc-300"></div>
@@ -100,7 +100,7 @@ export default function Landing(): React.JSX.Element {
 
       <div className="space-y-8">
         <div className="space-y-2 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
+          <h2 className="font-bold text-3xl text-zinc-900 tracking-tight">
             Features
           </h2>
           <p className="text-zinc-600">
@@ -173,7 +173,7 @@ export default function Landing(): React.JSX.Element {
 
       <div className="space-y-8">
         <div className="space-y-2 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-zinc-900">
+          <h2 className="font-bold text-3xl text-zinc-900 tracking-tight">
             Use cases
           </h2>
           <p className="text-zinc-600">
@@ -225,7 +225,7 @@ export default function Landing(): React.JSX.Element {
       </div>
 
       <div className="space-y-4 text-center">
-        <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
+        <h2 className="font-bold text-2xl text-zinc-900 tracking-tight">
           Ready to get started?
         </h2>
         <p className="text-zinc-600">
@@ -234,14 +234,14 @@ export default function Landing(): React.JSX.Element {
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
           <a
             href="https://github.com/jkuri/bore/releases"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-zinc-900 px-8 text-sm font-medium text-zinc-50 transition-colors hover:bg-zinc-800"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-zinc-900 px-8 font-medium text-sm text-zinc-50 transition-colors hover:bg-zinc-800"
           >
             <DownloadIcon className="h-4 w-4" />
             Download
           </a>
           <a
             href="https://github.com/jkuri/bore/blob/master/README.md"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-8 text-sm font-medium text-zinc-900 transition-colors hover:bg-zinc-50"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-zinc-200 bg-white px-8 font-medium text-sm text-zinc-900 transition-colors hover:bg-zinc-50"
           >
             Documentation
             <ArrowRightIcon className="h-4 w-4" />

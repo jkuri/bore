@@ -1,6 +1,6 @@
-import { Outlet } from 'react-router-dom';
-import BgPattern from './bg-pattern';
-import Header from './header';
+import { Outlet } from "react-router-dom";
+import BgPattern from "./bg-pattern";
+import Header from "./header";
 
 export default function Layout(): React.JSX.Element {
   return (

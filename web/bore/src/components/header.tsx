@@ -1,5 +1,5 @@
-import { GitHubLogoIcon } from '@radix-ui/react-icons';
-import { NavLink } from 'react-router-dom';
+import { GitHubLogoIcon } from "@radix-ui/react-icons";
+import { NavLink } from "react-router-dom";
 
 export default function Header(): React.JSX.Element {
   return (
