@@ -13,7 +13,7 @@ export default function Header(): React.JSX.Element {
         <div className="flex items-center justify-end">
           <a
             href="https://github.com/jkuri/bore"
-            className="text-green-600 transition-colors hover:text-green-500"
+            className="text-zinc-900 transition-colors hover:text-zinc-700"
           >
             <GitHubLogoIcon className="h-6 w-6" />
           </a>
