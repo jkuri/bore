@@ -19,16 +19,17 @@ const (
 
 // SSHServer defines SSH server instance.
 type SSHServer struct {
-	mu        sync.Mutex
-	opts      *Options
-	listener  net.Listener
-	config    *ssh.ServerConfig
-	running   chan error
-	isRunning bool
-	clients   map[string]*client
-	addr      string
-	domain    string
-	logger    *zap.SugaredLogger
+	mu         sync.Mutex
+	opts       *Options
+	listener   net.Listener
+	config     *ssh.ServerConfig
+	running    chan error
+	isRunning  bool
+	clients    map[string]*client
+	addr       string
+	domain     string
+	logger     *zap.SugaredLogger
+	metricsHub *MetricsHub
 }
 
 type client struct {
@@ -40,6 +41,7 @@ type client struct {
 	listeners map[string]net.Listener
 	addr      string
 	port      uint32
+	channels  map[ssh.Channel]bool
 }
 
 func (c *client) write(data string) {
@@ -135,6 +137,7 @@ func (s *SSHServer) listen() error {
 			tcpConn:   tcpConn,
 			sshConn:   sshConn,
 			listeners: make(map[string]net.Listener),
+			channels:  make(map[ssh.Channel]bool),
 			addr:      "",
 			port:      0,
 		}
@@ -143,6 +146,12 @@ func (s *SSHServer) listen() error {
 		go func(c *client) {
 			err := c.sshConn.Wait()
 			s.logger.Infof("[%s] SSH connection closed: %v", c.id, err)
+
+			c.mu.Lock()
+			for ch := range c.channels {
+				ch.Close()
+			}
+			c.mu.Unlock()
 
 			c.mu.Lock()
 			for bind, listener := range c.listeners {
@@ -268,8 +277,21 @@ func (s *SSHServer) handleForwardTCPIP(client *client, bindInfo *bindInfo, conn 
 		return
 	}
 	s.logger.Debugf("[%s] channel opened for client %s:%d <-> %s", client.id, bindInfo.Addr, bindInfo.Port, remoteAddr.String())
+
 	go ssh.DiscardRequests(requests)
-	go s.handleForwardTCPIPTransfer(c, conn)
+
+	client.mu.Lock()
+	client.channels[c] = true
+	client.mu.Unlock()
+
+	go func() {
+		defer func() {
+			client.mu.Lock()
+			delete(client.channels, c)
+			client.mu.Unlock()
+		}()
+		s.handleForwardTCPIPTransfer(client.id, c, conn)
+	}()
 }
 
 func (s *SSHServer) handleForward(client *client, req *ssh.Request) (net.Listener, *bindInfo, error) {
@@ -308,18 +330,25 @@ listen:
 	return ln, &bindInfo{bind, uint32(port), payload.Addr}, nil
 }
 
-func (s *SSHServer) handleForwardTCPIPTransfer(c ssh.Channel, conn net.Conn) {
+func (s *SSHServer) handleForwardTCPIPTransfer(clientID string, c ssh.Channel, conn net.Conn) {
 	defer conn.Close()
 	defer c.Close()
-	done := make(chan struct{})
+
+	done := make(chan struct{}, 2)
 
 	go func() {
-		io.Copy(c, conn)
+		n, _ := io.Copy(c, conn)
+		if s.metricsHub != nil && n > 0 {
+			s.metricsHub.RecordTraffic(clientID, uint64(n), 0)
+		}
 		done <- struct{}{}
 	}()
 
 	go func() {
-		io.Copy(conn, c)
+		n, _ := io.Copy(conn, c)
+		if s.metricsHub != nil && n > 0 {
+			s.metricsHub.RecordTraffic(clientID, 0, uint64(n))
+		}
 		done <- struct{}{}
 	}()
 

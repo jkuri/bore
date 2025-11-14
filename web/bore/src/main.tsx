@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Dashboard from "./components/dashboard.tsx";
 import Landing from "./components/landing.tsx";
 import Layout from "./components/layout.tsx";
 import NotFound from "./components/not-found.tsx";
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
         element: <Landing />,
       },
       {
+        path: "dashboard",
+        element: <Dashboard />,
+      },
+      {
         path: "not-found",
         element: <NotFound />,
       },
@@ -26,5 +31,5 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root") as HTMLDivElement).render(
   <React.StrictMode>
     <RouterProvider router={router} />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

@@ -30,6 +30,7 @@ type BoreServer struct {
 	opts       *Options
 	sshServer  *SSHServer
 	httpServer *HTTPServer
+	metricsHub *MetricsHub
 	UI         http.Handler
 }
 
@@ -38,10 +39,15 @@ func NewBoreServer(opts *Options, logger *zap.Logger) *BoreServer {
 	log := logger.Sugar()
 	landingFS, _ := fs.New()
 
+	sshServer := NewSSHServer(opts, log)
+	metricsHub := NewMetricsHub(sshServer, log)
+	sshServer.metricsHub = metricsHub
+
 	return &BoreServer{
 		opts:       opts,
-		sshServer:  NewSSHServer(opts, log),
+		sshServer:  sshServer,
 		httpServer: NewHTTPServer(log),
+		metricsHub: metricsHub,
 		UI:         http.FileServer(&statikWrapper{landingFS}),
 	}
 }
@@ -84,20 +90,45 @@ func (s *BoreServer) getHandler(handler http.Handler) http.Handler {
 		if remote == "" {
 			remote = r.RemoteAddr
 		}
-		log := fmt.Sprintf(
-			"%s %s (code=%d dt=%s written=%s remote=%s)",
-			r.Method,
-			r.URL,
-			m.Code,
-			m.Duration,
-			humanize.Bytes(uint64(m.Written)),
-			remote,
-		)
-		s.httpServer.logger.Debug(log)
 
-		userID := strings.Split(r.Host, ".")[0]
-		if client, ok := s.sshServer.clients[userID]; ok {
-			client.write(fmt.Sprintf("%s\n", log))
+		host, _, err := net.SplitHostPort(r.Host)
+		if err != nil {
+			host = r.Host
+		}
+
+		var log string
+		if host != s.opts.Domain {
+			userID := strings.Split(host, ".")[0]
+			log = fmt.Sprintf(
+				"[%s] %s %s (code=%d dt=%s written=%s remote=%s)",
+				userID,
+				r.Method,
+				r.URL,
+				m.Code,
+				m.Duration,
+				humanize.Bytes(uint64(m.Written)),
+				remote,
+			)
+			s.httpServer.logger.Debug(log)
+
+			s.sshServer.mu.Lock()
+			client, ok := s.sshServer.clients[userID]
+			s.sshServer.mu.Unlock()
+			if ok {
+				client.write(fmt.Sprintf("%s\n", log))
+				s.metricsHub.RecordTraffic(userID, uint64(r.ContentLength), uint64(m.Written))
+			}
+		} else {
+			log = fmt.Sprintf(
+				"%s %s (code=%d dt=%s written=%s remote=%s)",
+				r.Method,
+				r.URL,
+				m.Code,
+				m.Duration,
+				humanize.Bytes(uint64(m.Written)),
+				remote,
+			)
+			s.httpServer.logger.Debug(log)
 		}
 	})
 }
@@ -113,7 +144,11 @@ func (s *BoreServer) handleHTTP() http.Handler {
 			splitted := strings.Split(host, ".")
 			userID := splitted[0]
 
-			if client, ok := s.sshServer.clients[userID]; ok {
+			s.sshServer.mu.Lock()
+			client, ok := s.sshServer.clients[userID]
+			s.sshServer.mu.Unlock()
+
+			if ok {
 				w.Header().Set("X-Proxy", "bore")
 
 				if strings.ToLower(r.Header.Get("Upgrade")) == "websocket" {
@@ -125,12 +160,25 @@ func (s *BoreServer) handleHTTP() http.Handler {
 
 				url := &url.URL{Scheme: "http", Host: fmt.Sprintf("%s:%d", client.addr, client.port)}
 				proxy := httputil.NewSingleHostReverseProxy(url)
+				proxy.ErrorHandler = func(w http.ResponseWriter, r *http.Request, err error) {
+					if strings.Contains(err.Error(), "connection refused") || strings.Contains(err.Error(), "EOF") {
+						s.httpServer.logger.Debugf("[%s] tunnel closed during request: %v", userID, err)
+					} else {
+						s.httpServer.logger.Errorf("[%s] proxy error: %v", userID, err)
+					}
+					w.WriteHeader(http.StatusBadGateway)
+				}
 				proxy.ServeHTTP(w, r)
 				return
 			}
 
 			url := &url.URL{Scheme: r.URL.Scheme, Host: s.opts.Domain, Path: "not-found", RawQuery: fmt.Sprintf("tunnelID=%s", userID)}
 			http.Redirect(w, r, url.String(), http.StatusMovedPermanently)
+			return
+		}
+
+		if r.URL.Path == "/api/ws/dashboard" {
+			s.metricsHub.HandleWebSocket(w, r)
 			return
 		}
 

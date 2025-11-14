@@ -1,17 +1,24 @@
-import { Outlet } from "react-router-dom";
-import BgPattern from "./bg-pattern";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./header";
 
 export default function Layout(): React.JSX.Element {
+  const location = useLocation();
+  const isDashboard = location.pathname === "/dashboard";
+
   return (
-    <div className="bg-white">
+    <div className="min-h-screen">
       <Header />
-      <div className="relative isolate px-6 pt-4 lg:px-8">
-        <BgPattern />
-        <div className="mx-auto max-w-4xl py-32 sm:py-48">
+      {isDashboard ? (
+        <div className="pt-16">
           <Outlet />
         </div>
-      </div>
+      ) : (
+        <div className="relative isolate px-6 pt-4 lg:px-8">
+          <div className="mx-auto max-w-7xl py-32 sm:py-48">
+            <Outlet />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
