@@ -192,6 +192,9 @@ func (h *MetricsHub) collectMetrics() []TunnelMetrics {
 			h.tunnelMetrics[id] = metric
 		}
 
+		metric.Port = client.port
+		metric.Addr = client.addr
+
 		elapsed := now.Sub(metric.LastActivity).Seconds()
 		if elapsed >= 1.0 {
 			metric.ThroughputIn = float64(metric.BytesIn) / elapsed

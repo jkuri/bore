@@ -112,7 +112,10 @@ export default function Dashboard(): React.JSX.Element {
           try {
             const data: DashboardMessage = JSON.parse(event.data);
             if (data.type === "update") {
-              setTunnels(data.tunnels || []);
+              const tunnels = data.tunnels.sort((a, b) => {
+                return a.id.localeCompare(b.id);
+              });
+              setTunnels(tunnels || []);
               setServerStats(
                 data.serverStats || {
                   totalBytesIn: 0,
@@ -121,7 +124,7 @@ export default function Dashboard(): React.JSX.Element {
                   cumulativeBytesOut: 0,
                   throughputIn: 0,
                   throughputOut: 0,
-                },
+                }
               );
             }
           } catch (err) {
@@ -159,7 +162,7 @@ export default function Dashboard(): React.JSX.Element {
 
   const totalConnections = tunnels.reduce(
     (sum, t) => sum + t.activeConnections,
-    0,
+    0
   );
 
   return (
@@ -247,12 +250,12 @@ export default function Dashboard(): React.JSX.Element {
           <CardContent>
             <div className="font-bold text-2xl">
               {formatBytes(
-                serverStats.throughputIn + serverStats.throughputOut,
+                serverStats.throughputIn + serverStats.throughputOut
               )}
             </div>
             <p className="text-muted-foreground text-xs">
               {formatTotalBytes(
-                serverStats.cumulativeBytesIn + serverStats.cumulativeBytesOut,
+                serverStats.cumulativeBytesIn + serverStats.cumulativeBytesOut
               )}{" "}
               total
             </p>
@@ -288,9 +291,7 @@ export default function Dashboard(): React.JSX.Element {
                     <TableHead className="h-10 w-[70px] text-xs">
                       Port
                     </TableHead>
-                    <TableHead className="h-10 w-[80px] text-xs">
-                      Uptime
-                    </TableHead>
+                    <TableHead className="h-10 w-20 text-xs">Uptime</TableHead>
                     <TableHead className="h-10 w-[60px] text-xs">
                       Channels
                     </TableHead>
