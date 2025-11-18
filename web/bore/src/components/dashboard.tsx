@@ -286,19 +286,15 @@ export default function Dashboard(): React.JSX.Element {
               <Table>
                 <TableHeader>
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="h-10 w-[100px] text-xs">ID</TableHead>
+                    <TableHead className="h-10 text-xs">ID</TableHead>
                     <TableHead className="h-10 text-xs">URL</TableHead>
-                    <TableHead className="h-10 w-[70px] text-xs">
-                      Port
-                    </TableHead>
-                    <TableHead className="h-10 w-20 text-xs">Uptime</TableHead>
-                    <TableHead className="h-10 w-[60px] text-xs">
-                      Channels
-                    </TableHead>
-                    <TableHead className="h-10 w-[130px] text-right text-xs">
+                    <TableHead className="h-10 text-xs">Port</TableHead>
+                    <TableHead className="h-10 text-xs">Uptime</TableHead>
+                    <TableHead className="h-10 text-xs">Channels</TableHead>
+                    <TableHead className="h-10 w-36 text-right text-xs">
                       In
                     </TableHead>
-                    <TableHead className="h-10 w-[130px] text-right text-xs">
+                    <TableHead className="h-10 w-36 text-right text-xs">
                       Out
                     </TableHead>
                   </TableRow>
