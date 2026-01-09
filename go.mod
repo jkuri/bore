@@ -13,7 +13,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/yhat/wsutil v0.0.0-20170731153501-1d66fa95c997
 	go.uber.org/zap v1.27.0
-	golang.org/x/crypto v0.42.0
+	golang.org/x/crypto v0.45.0
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 )
 
@@ -40,6 +40,6 @@ require (
 	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/sys v0.38.0 // indirect
+	golang.org/x/text v0.31.0 // indirect
 )
